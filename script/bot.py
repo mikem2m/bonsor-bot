@@ -1,15 +1,17 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.wait import WebDriverWait
 from time import sleep
 from datetime import datetime
 from dotenv import load_dotenv
 import os
 
 
-BONSOR_INTERMEDIATE_URL = "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634"
+BONSOR_TUESDAY_BASKETBALL_URL = "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8613" # FOR TESTING
+BONSOR_FRIDAY_INTERMEDIATE_URL = "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634"
 BONSOR_REGISTRATION_TIME_HOUR = 9
 
 
@@ -71,7 +73,57 @@ class BonsorBot:
 
 
     def add_participants(self):
-        pass #TODO: Continue Here!
+        # I added 'last()' in the XPATH to make sure that its the last 'Add' button
+        # This was done to avoid the case where this week's intermediate option has an open spot, but we want to sign up for next week's spot instead
+        # To avoid selecting this week's session instead, pick the last one available
+        # The ones for 2-3 weeks in advance will not have the 'Add' button, so we are good
+        ADD_BUTTON_TITLE = "Click here to add the corresponding course to your cart. Once in your cart you can continue shopping or go to checkout and finalized your registration"
+        add_button = self.driver.find_element(By.XPATH, f'//a[@title=\'{ADD_BUTTON_TITLE}\'][last()]') 
+        add_button.click()
+
+        # Wait until cart dialog pops up
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "cart"))
+        )
+
+        # Find the 'Select A Participant' dropdown
+        DROPDOWN_XPATH = "//select[@title='Select a client']"
+        dropdown = Select(self.driver.find_element(By.XPATH, DROPDOWN_XPATH))
+        
+        # Save all participant names in a hashmap of id and names - retrieves this from the dropdown
+        participant_map = {}
+        for option in dropdown.options:
+            id = option.get_attribute('value')
+            name = option.text
+            if id == '0': # The dropdown has a default option with value attribute '0' that we should not add to the map
+                continue
+            else:
+                participant_map[id] = name
+
+        NUMBER_OF_PARTICIPANTS = len(participant_map)
+        for idx, (id, name) in enumerate(participant_map.items()):
+            # Select from dropdown
+            dropdown.select_by_value(id)
+
+            # Wait until participant is added
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, f'//a[@title=\'{name}: Select to view client details.\']'))
+            )
+
+            # Add another participant if it's not the last element
+            if idx != NUMBER_OF_PARTICIPANTS - 1:
+                add_another_participant_button = self.driver.find_element(By.XPATH, "//input[@title='Select to add another client to cart.'][1]")
+                add_another_participant_button.click()
+
+                # Re-select 'Select A Participant' dropdown -> this is fine since only one dropdown should show up at a time!
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, DROPDOWN_XPATH))
+                )
+                dropdown = Select(self.driver.find_element(By.XPATH, DROPDOWN_XPATH))
+
+        # Navigate to checkout page
+        checkout_button = self.driver.find_element(By.XPATH, "//input[@title='Click here to go to the checkout and pay for the items in your shopping cart.']")
+        checkout_button.click()
 
 
     def logout(self):
@@ -96,7 +148,7 @@ class BonsorBot:
         self.login()
 
         # Refresh at 9:00
-        self.wait_and_refresh()
+        # self.wait_and_refresh()
 
         # Add participants to cart
         self.add_participants()
@@ -109,5 +161,4 @@ class BonsorBot:
 
 
 if __name__ == "__main__":
-    BonsorBot(BONSOR_INTERMEDIATE_URL)
-    
+    BonsorBot(BONSOR_TUESDAY_BASKETBALL_URL)
