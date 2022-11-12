@@ -100,6 +100,8 @@ class BonsorBot:
             else:
                 participant_map[id] = name
 
+        #TODO: NEED TO WRAP THE BELOW CODE IN TRY / FINALLY BLOCK SO IN THE CASE THAT WE ARE WAITLISTED, THE OTHER SPOTS CAN STILL BE BOOKED
+
         NUMBER_OF_PARTICIPANTS = len(participant_map)
         for idx, (id, name) in enumerate(participant_map.items()):
             # Select from dropdown
@@ -126,6 +128,11 @@ class BonsorBot:
         checkout_button.click()
 
 
+    def pay(self):
+        # TODO: PAYMENT HERE -> MAKE SURE CREDIT BALANCE IS AVAILABLE (USING ASSERTIONS)
+        pass
+
+
     def logout(self):
         logout_button = self.driver.find_element(By.XPATH, "//a[@title='Select to logout.']")
         logout_button.click()
@@ -148,10 +155,14 @@ class BonsorBot:
         self.login()
 
         # Refresh at 9:00
-        # self.wait_and_refresh()
+        # TODO: UNCOMMENT BELOW
+        # self.wait_and_refresh() 
 
         # Add participants to cart
         self.add_participants()
+
+        # Pay
+        self.pay()
 
         # Log user out
         self.logout()
