@@ -1,47 +1,80 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
 from datetime import datetime
 from dotenv import load_dotenv
-import unittest
 import os
+
+
+BONSOR_INTERMEDIATE_URL = "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634"
 
 
 class BonsorBot:
     def __init__(self, url):
+        # Init driver
+        self.driver = webdriver.Chrome("../../chromedriver.exe")
+
+        # Init constants
         load_dotenv()
-        self.driver = webdriver.Chrome('/Users/jonathanadithya/Documents/scripts/chromedriver 2')
         self.url = url
+        self.family_pin = os.getenv('FAMILY_PIN')
+        self.member_id = os.getenv('MEMBER_ID')
+
+        # Run main
         self.main()
+
 
     def navigate_to_website(self):
         self.driver.get(self.url)
-        sleep(1)
+
+        # Wait until webpage loads
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "toolbar-login"))
+        )
+
 
     def login(self):
         login_button = self.driver.find_element(By.XPATH, "//a[@title='Click here to login.']")
         login_button.click()
-        sleep(1)
-        client_field = self.driver.find_element(By.XPATH, "//*[@id='ClientBarcode']")
-        pin_field = self.driver.find_element(By.XPATH, "//*[@id='AccountPIN']")
-        # client_field.send_keys(os.environ.get('CLIENT'))
-        # pin_field.send_keys(os.environ.get('PIN'))
-        client_field.send_keys('372843')
-        pin_field.send_keys('329843')
-        sleep(1)
+
+        # Wait until User Login dialog pops up
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "user-login-dialog"))
+        )
+
+        client_field = self.driver.find_element(By.XPATH, "//input[@id='ClientBarcode']")
+        pin_field = self.driver.find_element(By.XPATH, "//input[@id='AccountPIN']")
+
+        client_field.send_keys(self.member_id)
+        pin_field.send_keys(self.family_pin)
+
+        # Login
+        pin_field.send_keys(Keys.ENTER)
+
+        # Wait until User Login dialog disappears 
+        WebDriverWait(self.driver, 10).until(
+            EC.invisibility_of_element((By.ID, "user-login-dialog"))
+        )
         
+
     def refresh(self):
         # Wait until it's 9 o'clock
         while datetime.now().hour != 9:
-            sleep(0.1)
+            sleep(0.1) # check every 100 ms
+
         self.driver.refresh()
+
+
+    def add_participants(self):
+        sleep(10) #TODO: Continue Here!
+
 
     def exit(self):
         self.driver.quit()
+
 
     def main(self):
         # Go to website at 8:59
@@ -51,11 +84,14 @@ class BonsorBot:
         self.login()
 
         # Refresh at 9:00
-        # self.refresh()
+        self.refresh()
+
+        # Add participants to cart
+        self.add_participants()
 
         # Cleanup
         self.exit()
 
 
 if __name__ == "__main__":
-    BonsorBot('https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634')
+    BonsorBot(BONSOR_INTERMEDIATE_URL)
