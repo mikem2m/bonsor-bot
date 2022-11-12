@@ -10,6 +10,7 @@ import os
 
 
 BONSOR_INTERMEDIATE_URL = "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634"
+BONSOR_REGISTRATION_TIME_HOUR = 9
 
 
 class BonsorBot:
@@ -60,16 +61,27 @@ class BonsorBot:
         )
         
 
-    def refresh(self):
+    def wait_and_refresh(self):
         # Wait until it's 9 o'clock
-        while datetime.now().hour != 9:
+        
+        while datetime.now().hour != BONSOR_REGISTRATION_TIME_HOUR:
             sleep(0.1) # check every 100 ms
 
         self.driver.refresh()
 
 
     def add_participants(self):
-        sleep(10) #TODO: Continue Here!
+        pass #TODO: Continue Here!
+
+
+    def logout(self):
+        logout_button = self.driver.find_element(By.XPATH, "//a[@title='Select to logout.']")
+        logout_button.click()
+
+        # Wait until Login button is back -> User has been signed out
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "toolbar-login"))
+        )
 
 
     def exit(self):
@@ -84,10 +96,13 @@ class BonsorBot:
         self.login()
 
         # Refresh at 9:00
-        self.refresh()
+        self.wait_and_refresh()
 
         # Add participants to cart
         self.add_participants()
+
+        # Log user out
+        self.logout()
 
         # Cleanup
         self.exit()
@@ -95,3 +110,4 @@ class BonsorBot:
 
 if __name__ == "__main__":
     BonsorBot(BONSOR_INTERMEDIATE_URL)
+    
