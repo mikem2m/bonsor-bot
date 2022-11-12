@@ -2,56 +2,60 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
+from datetime import datetime
 from dotenv import load_dotenv
 import unittest
 import os
 
 
-class BonsorBot(unittest.TestCase):
-    def setUp(self):
+class BonsorBot:
+    def __init__(self, url):
         load_dotenv()
-        # service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome('../chromedriver.exe')
+        self.driver = webdriver.Chrome('/Users/jonathanadithya/Documents/scripts/chromedriver 2')
+        self.url = url
+        self.main()
 
-    def test_finding_cpsc121_lab(self):
-        self.driver.get("https://courses.students.ubc.ca/cs/courseschedule")
+    def navigate_to_website(self):
+        self.driver.get(self.url)
+        sleep(1)
 
-        login = self.driver.find_element(By.XPATH, '//*[@id="cwl"]/form/input')
-        login.click()
-        self.assertEqual(self.driver.title, "CWL Authentication")
-        login_name = self.driver.find_element(By.XPATH, '//*[@id="username"]')
-        password = self.driver.find_element(By.XPATH, '//*[@id="password"]')
-        submit = self.driver.find_element(
-            By.XPATH, '//*[@id="fm1"]/section[5]/input[4]'
-        )
-        login_name.send_keys(os.environ["USERNAME"])
-        password.send_keys(os.environ["PASSWORD"])
-        submit.click()
+    def login(self):
+        login_button = self.driver.find_element(By.XPATH, "//a[@title='Click here to login.']")
+        login_button.click()
+        sleep(1)
+        client_field = self.driver.find_element(By.XPATH, "//*[@id='ClientBarcode']")
+        pin_field = self.driver.find_element(By.XPATH, "//*[@id='AccountPIN']")
+        # client_field.send_keys(os.environ.get('CLIENT'))
+        # pin_field.send_keys(os.environ.get('PIN'))
+        client_field.send_keys('372843')
+        pin_field.send_keys('329843')
+        sleep(1)
+        
+    def refresh(self):
+        # Wait until it's 9 o'clock
+        while datetime.now().hour != 9:
+            sleep(0.1)
+        self.driver.refresh()
 
-        sleep(2.5)
-        worklist = self.driver.find_element(
-            By.XPATH, '/html/body/div[2]/div[4]/div/ul/li[2]/a'
-        )
-        worklist.click()
-        sleep(2)
-
-        courses = [1, 2, 4] + [i for i in range(6, 14)] + [15, 16, 17, 18, 22, 23]
-        print('\n---------- COURSES ----------')
-        for i in courses:
-            status = self.driver.find_element(
-                By.XPATH,
-                f'/html/body/div[2]/div[4]/form[2]/table[2]/tbody/tr[{i}]/td[2]',
-            ).text
-            name = self.driver.find_element(
-                By.XPATH,
-                f'/html/body/div[2]/div[4]/form[2]/table[2]/tbody/tr[{i}]/td[3]/a',
-            ).text
-            print(name + '\t' + status)
-
-    def tearDown(self):
+    def exit(self):
         self.driver.quit()
+
+    def main(self):
+        # Go to website at 8:59
+        self.navigate_to_website()
+
+        # Login with client and family pin
+        self.login()
+
+        # Refresh at 9:00
+        # self.refresh()
+
+        # Cleanup
+        self.exit()
 
 
 if __name__ == "__main__":
-    unittest.main()
+    BonsorBot('https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634')
