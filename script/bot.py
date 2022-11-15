@@ -58,27 +58,60 @@ class RegistrationBot:
         selenium webdriver
     url : str
         url for the volleyball registration
-    family_pin : str
-        identification pin for webreg account
     member_id : str
         client number for webreg account
+    family_pin : str
+        identification pin for webreg account
     num_participants : int
         number of participants in the account
+
+    Class Methods
+    -------------
+    url(url)
+        Initialize RegistrationBot with the given url and account identification from dotenv
+    identification(url, member_id, family_pin)
+        Initialize RegistrationBot with the given URL and account identification
     """
 
-    def __init__(self, url):
+    def __init__(self, url, member_id, family_pin):
         # Init driver
         self.driver = webdriver.Chrome("../../chromedriver 2")
 
         # Init constants
-        load_dotenv()
-        self.url = url
-        self.family_pin = os.getenv('FAMILY_PIN')
-        self.member_id = os.getenv('MEMBER_ID')
+        self._url = url
         self.num_participants = 0
+        self.member_id = member_id
+        self.family_pin = family_pin
 
         # Run main
         self.main()
+
+    @classmethod
+    def url(cls, url):
+        """Initialize RegistrationBot with the given url and account identification from dotenv
+
+        Parameters
+        ----------
+        url : string
+            url for the volleyball registration
+        """
+        load_dotenv()
+        cls(url, os.getenv('MEMBER_ID'), os.getenv('FAMILY_PIN'))
+
+    @classmethod
+    def identification(cls, url, member_id, family_pin):
+        """Initialize RegistrationBot with the given URL and account identification
+
+        Parameters
+        ----------
+        url : string
+            url for the volleyball registration
+        member_id : string
+            client number for webreg account
+        family_pin : string
+            identification pin for webreg account
+        """
+        cls(url, member_id, family_pin)
 
     def navigate_to_website(self):
         """Navigate to the provided url.
@@ -369,5 +402,5 @@ class RegistrationBot:
 
 
 if __name__ == "__main__":
-    RegistrationBot(EDMONDS_TUESDAY_URL)
+    RegistrationBot.url(EDMONDS_TUESDAY_URL)
     
