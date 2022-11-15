@@ -1,4 +1,5 @@
-"""Volleyball Registration Automation (Webreg Burnaby) using Selenium
+"""
+Volleyball Registration Automation (Webreg Burnaby) using Selenium
 
 Classes:
     RegistrationBot
@@ -10,6 +11,10 @@ Misc Variables:
     BONSOR_TUESDAY_INTEMEDIATE_URL
     BONSOR_FRIDAY_INTERMEDIATE_URL
     BONSOR_REGISTRATION_TIME_HOUR
+
+Author:
+    Jonathan Aditya @ https://github.com/jo-adithya
+    Michael Suriawan @ https://github.com/mikem2m
 """
 
 import os
@@ -40,6 +45,7 @@ BONSOR_FRIDAY_INTERMEDIATE_URL = (
     "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634"
 )
 BONSOR_REGISTRATION_TIME_HOUR = 9
+BONSOR_REGISTRATION_COST = 5.25
 
 
 class RegistrationBot:
@@ -258,7 +264,7 @@ class RegistrationBot:
                 By.XPATH, "//*[@id='current-balance']/div/span[2]"
             ).text.split("$")[1]
         )
-        if current_balance < self.num_participants * 5.25:
+        if current_balance < self.num_participants * BONSOR_REGISTRATION_COST:
             print("Insufficient Fund")
             return False
 
@@ -329,11 +335,12 @@ class RegistrationBot:
         self.login()
 
         # Refresh at 9:00
-        # self.wait_and_refresh()
+        self.wait_and_refresh()
 
         # Add participants to cart
         self.add_participants()
 
+        # Go to checkout page
         self.go_to_checkout()
 
         # Log user out if payment is successful, otherwise quit so that the cart won't be removed.
@@ -345,4 +352,5 @@ class RegistrationBot:
 
 
 if __name__ == "__main__":
-    RegistrationBot(BONSOR_TUESDAY_BEGINNER_URL)
+    RegistrationBot(EDMONDS_TUESDAY_URL)
+    
