@@ -4,14 +4,6 @@ Volleyball Registration Automation (Webreg Burnaby) using Selenium
 Classes:
     RegistrationBot
 
-Misc Variables:
-    EDMONDS_TUESDAY_URL
-    EDMONDS_THURSDAY_URL
-    BONSOR_TUESDAY_BEGINNER_URL
-    BONSOR_TUESDAY_INTEMEDIATE_URL
-    BONSOR_FRIDAY_INTERMEDIATE_URL
-    BONSOR_REGISTRATION_TIME_HOUR
-
 Author:
     Jonathan Aditya @ https://github.com/jo-adithya
     Michael Suriawan @ https://github.com/mikem2m
@@ -30,23 +22,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-EDMONDS_TUESDAY_URL = (
-    "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8607"
-)
-EDMONDS_THURSDAY_URL = (
-    "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8614"
-)
-BONSOR_TUESDAY_BEGINNER_URL = (
-    "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8633"
-)
-BONSOR_TUESDAY_INTEMEDIATE_URL = (
-    "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8642"
-)
-BONSOR_FRIDAY_INTERMEDIATE_URL = (
-    "https://webreg.burnaby.ca/webreg/Activities/ActivitiesDetails.asp?aid=8634"
-)
-BONSOR_REGISTRATION_TIME_HOUR = 9
-BONSOR_REGISTRATION_COST = 5.25
+from helper import generate_url, BONSOR_REGISTRATION_TIME_HOUR, BONSOR_REGISTRATION_COST
 
 
 class RegistrationBot:
@@ -58,27 +34,60 @@ class RegistrationBot:
         selenium webdriver
     url : str
         url for the volleyball registration
-    family_pin : str
-        identification pin for webreg account
     member_id : str
         client number for webreg account
+    family_pin : str
+        identification pin for webreg account
     num_participants : int
         number of participants in the account
+
+    Class Methods
+    -------------
+    url(url)
+        Initialize RegistrationBot with the given url and account identification from dotenv
+    identification(url, member_id, family_pin)
+        Initialize RegistrationBot with the given URL and account identification
     """
 
-    def __init__(self, url):
+    def __init__(self, _url, member_id, family_pin):
         # Init driver
         self.driver = webdriver.Chrome("../../chromedriver 2")
 
         # Init constants
-        load_dotenv()
-        self.url = url
-        self.family_pin = os.getenv('FAMILY_PIN')
-        self.member_id = os.getenv('MEMBER_ID')
+        self._url = _url
         self.num_participants = 0
+        self.member_id = member_id
+        self.family_pin = family_pin
 
         # Run main
         self.main()
+
+    @classmethod
+    def url(cls, _url):
+        """Initialize RegistrationBot with the given url and account identification from dotenv
+
+        Parameters
+        ----------
+        url : string
+            url for the volleyball registration
+        """
+        load_dotenv()
+        cls(_url, os.getenv('MEMBER_ID'), os.getenv('FAMILY_PIN'))
+
+    @classmethod
+    def identification(cls, _url, member_id, family_pin):
+        """Initialize RegistrationBot with the given URL and account identification
+
+        Parameters
+        ----------
+        url : string
+            url for the volleyball registration
+        member_id : string
+            client number for webreg account
+        family_pin : string
+            identification pin for webreg account
+        """
+        cls(_url, member_id, family_pin)
 
     def navigate_to_website(self):
         """Navigate to the provided url.
@@ -266,9 +275,9 @@ class RegistrationBot:
         """
         # Check balance: Returns false if insufficient balance
         current_balance = float(
-            self.driver.find_element(
-                By.XPATH, "//*[@id='current-balance']/div/span[2]"
-            ).text.split("$")[1].replace(')', '')
+            self.driver.find_element(By.XPATH, "//*[@id='current-balance']/div/span[2]")
+            .text.split("$")[1]
+            .replace(')', '')
         )
         if current_balance < self.num_participants * BONSOR_REGISTRATION_COST:
             print("Insufficient Fund")
@@ -360,14 +369,14 @@ class RegistrationBot:
         add_button_title = "Click here to add the corresponding course to your cart. Once in your cart you can continue shopping or go to checkout and finalized your registration"
         add_button_xpath = f'//a[@title=\'{add_button_title}\'][last()]'
         try:
-            self.driver.find_element(
-                By.XPATH, add_button_xpath
-            )
+            self.driver.find_element(By.XPATH, add_button_xpath)
         except NoSuchElementException:
             return False
         return True
 
 
 if __name__ == "__main__":
-    RegistrationBot(EDMONDS_TUESDAY_URL)
-    
+    if url := generate_url() is not None:
+        RegistrationBot.url(url)
+    else:
+        print('No volleyball registration for today')
