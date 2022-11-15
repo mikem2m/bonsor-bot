@@ -1,3 +1,17 @@
+"""Volleyball Registration Automation (Webreg Burnaby) using Selenium
+
+Classes:
+    RegistrationBot
+
+Misc Variables:
+    EDMONDS_TUESDAY_URL
+    EDMONDS_THURSDAY_URL
+    BONSOR_TUESDAY_BEGINNER_URL
+    BONSOR_TUESDAY_INTEMEDIATE_URL
+    BONSOR_FRIDAY_INTERMEDIATE_URL
+    BONSOR_REGISTRATION_TIME_HOUR
+"""
+
 import os
 from datetime import datetime
 from time import sleep
@@ -28,7 +42,23 @@ BONSOR_FRIDAY_INTERMEDIATE_URL = (
 BONSOR_REGISTRATION_TIME_HOUR = 9
 
 
-class BonsorBot:
+class RegistrationBot:
+    """A class to represent the selenium driver automation
+
+    Attributes:
+    -----------
+    driver : WebDriver
+        selenium webdriver
+    url : str
+        url for the volleyball registration
+    family_pin : str
+        identification pin for webreg account
+    member_id : str
+        client number for webreg account
+    num_participants : int
+        number of participants in the account
+    """
+
     def __init__(self, url):
         # Init driver
         self.driver = webdriver.Chrome("../../chromedriver 2")
@@ -44,6 +74,16 @@ class BonsorBot:
         self.main()
 
     def navigate_to_website(self):
+        """Navigate to the provided url.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         self.driver.get(self.url)
 
         # Wait until webpage loads
@@ -52,6 +92,16 @@ class BonsorBot:
         )
 
     def login(self):
+        """Login to the webreg account using the provided family_pin and member_id.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         login_button = self.driver.find_element(
             By.XPATH, "//a[@title='Click here to login.']"
         )
@@ -79,6 +129,16 @@ class BonsorBot:
         )
 
     def wait_and_refresh(self):
+        """Wait until the registration time (9 AM) and then refresh the page.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         # Wait until it's 9 o'clock
         while datetime.now().hour != BONSOR_REGISTRATION_TIME_HOUR:
             sleep(0.1)  # check every 100 ms
@@ -86,8 +146,20 @@ class BonsorBot:
         self.driver.refresh()
 
     def add_participants(self):
-        # I added 'last()' in the XPATH to make sure that its the last 'Add' button
-        # This was done to avoid the case where this week's intermediate option has an open spot, but we want to sign up for next week's spot instead
+        """Add all of the participants in the account to the cart."
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+
+        # I added 'last()' in the XPATH to make sure that its the last 'Add' button.
+        # This was done to avoid the case where this week's intermediate option has
+        # an open spot, but we want to sign up for next week's spot instead.
         # To avoid selecting this week's session instead, pick the last one available
         # The ones for 2-3 weeks in advance will not have the 'Add' button, so we are good
         add_button_title = "Click here to add the corresponding course to your cart. Once in your cart you can continue shopping or go to checkout and finalized your registration"
@@ -147,6 +219,16 @@ class BonsorBot:
                 dropdown = Select(self.driver.find_element(By.XPATH, dropdown_xpath))
 
     def go_to_checkout(self):
+        """Navigate to the checkout page.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         # Navigate to checkout page
         checkout_button = self.driver.find_element(
             By.XPATH,
@@ -160,14 +242,24 @@ class BonsorBot:
         )
 
     def pay(self):
+        """Complete the transaction if the account balance is sufficient.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        bool: state of the transaction (success or fail)
+        """
         # Check balance: Returns false if insufficient balance
         current_balance = float(
             self.driver.find_element(
                 By.XPATH, "//*[@id='current-balance']/div/span[2]"
             ).text.split("$")[1]
         )
-        print(current_balance, self.num_participants)
         if current_balance < self.num_participants * 5.25:
+            print("Insufficient Fund")
             return False
 
         # Complete transaction if balance is enough
@@ -182,9 +274,20 @@ class BonsorBot:
                 (By.XPATH, "//*[@id='content']/h2"), "Transaction Completed"
             )
         )
+        print(f"Successfully registered Client # {self.member_id}")
         return True
 
     def logout(self):
+        """Logout the webreg account
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         logout_button = self.driver.find_element(
             By.XPATH, "//a[@title='Select to logout.']"
         )
@@ -196,9 +299,29 @@ class BonsorBot:
         )
 
     def exit(self):
+        """Quit the webdriver process
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         self.driver.quit()
 
     def main(self):
+        """Main control method for the volleyball registration automation process
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         # Go to website at 8:59
         self.navigate_to_website()
 
@@ -206,7 +329,7 @@ class BonsorBot:
         self.login()
 
         # Refresh at 9:00
-        self.wait_and_refresh()
+        # self.wait_and_refresh()
 
         # Add participants to cart
         self.add_participants()
@@ -222,4 +345,4 @@ class BonsorBot:
 
 
 if __name__ == "__main__":
-    BonsorBot(BONSOR_TUESDAY_BEGINNER_URL)
+    RegistrationBot(BONSOR_TUESDAY_BEGINNER_URL)
