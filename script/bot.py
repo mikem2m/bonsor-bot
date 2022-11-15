@@ -23,6 +23,7 @@ from time import sleep
 
 from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -146,10 +147,15 @@ class RegistrationBot:
         None
         """
         # Wait until it's 9 o'clock
-        while datetime.now().hour != BONSOR_REGISTRATION_TIME_HOUR:
+        while datetime.now().hour != 1:
             sleep(0.1)  # check every 100 ms
 
+        # First Refresh
         self.driver.refresh()
+
+        # Refresh until add button is available
+        while not self.__check_add_button_exists():
+            self.driver.refresh()
 
     def add_participants(self):
         """Add all of the participants in the account to the cart."
@@ -350,6 +356,17 @@ class RegistrationBot:
         # Cleanup
         self.exit()
 
+    def __check_add_button_exists(self):
+        add_button_title = "Click here to add the corresponding course to your cart. Once in your cart you can continue shopping or go to checkout and finalized your registration"
+        add_button_xpath = f'//a[@title=\'{add_button_title}\'][last()]'
+        try:
+            self.driver.find_element(
+                By.XPATH, add_button_xpath
+            )
+        except NoSuchElementException:
+            return False
+        return True
+        
 
 if __name__ == "__main__":
     RegistrationBot(EDMONDS_TUESDAY_URL)
