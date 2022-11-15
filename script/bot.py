@@ -90,9 +90,9 @@ class BonsorBot:
         # This was done to avoid the case where this week's intermediate option has an open spot, but we want to sign up for next week's spot instead
         # To avoid selecting this week's session instead, pick the last one available
         # The ones for 2-3 weeks in advance will not have the 'Add' button, so we are good
-        ADD_BUTTON_TITLE = "Click here to add the corresponding course to your cart. Once in your cart you can continue shopping or go to checkout and finalized your registration"
+        add_button_title = "Click here to add the corresponding course to your cart. Once in your cart you can continue shopping or go to checkout and finalized your registration"
         add_button = self.driver.find_element(
-            By.XPATH, f'//a[@title=\'{ADD_BUTTON_TITLE}\'][last()]'
+            By.XPATH, f'//a[@title=\'{add_button_title}\'][last()]'
         )
         add_button.click()
 
@@ -102,26 +102,24 @@ class BonsorBot:
         )
 
         # Find the 'Select A Participant' dropdown
-        DROPDOWN_XPATH = "//select[@title='Select a client']"
-        dropdown = Select(self.driver.find_element(By.XPATH, DROPDOWN_XPATH))
+        dropdown_xpath = "//select[@title='Select a client']"
+        dropdown = Select(self.driver.find_element(By.XPATH, dropdown_xpath))
 
         # Save all participant names in a hashmap of id and names - retrieves this from the dropdown
         participant_map = {}
         for option in dropdown.options:
-            id = option.get_attribute('value')
+            _id = option.get_attribute('value')
             name = option.text
-            # The dropdown has a default option with value attribute '0' that we should not add to the map
-            if id == '0':
-                continue
-            else:
-                participant_map[id] = name
 
-        # TODO: NEED TO WRAP THE BELOW CODE IN TRY / FINALLY BLOCK SO IN THE CASE THAT WE ARE WAITLISTED, THE OTHER SPOTS CAN STILL BE BOOKED
+            # There is a default option with value attribute '0'that should not add to the map
+            if _id == '0':
+                continue
+            participant_map[_id] = name
 
         self.num_participants = len(participant_map)
-        for idx, (id, name) in enumerate(participant_map.items()):
+        for idx, (_id, name) in enumerate(participant_map.items()):
             # Select from dropdown
-            dropdown.select_by_value(id)
+            dropdown.select_by_value(_id)
 
             # Wait until participant is added
             WebDriverWait(self.driver, 10).until(
@@ -141,11 +139,12 @@ class BonsorBot:
                 )
                 add_another_participant_button.click()
 
-                # Re-select 'Select A Participant' dropdown -> this is fine since only one dropdown should show up at a time!
+                # Re-select 'Select A Participant' dropdown
+                #   -> this is fine since only one dropdown should show up at a time!
                 WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, DROPDOWN_XPATH))
+                    EC.presence_of_element_located((By.XPATH, dropdown_xpath))
                 )
-                dropdown = Select(self.driver.find_element(By.XPATH, DROPDOWN_XPATH))
+                dropdown = Select(self.driver.find_element(By.XPATH, dropdown_xpath))
 
     def go_to_checkout(self):
         # Navigate to checkout page
@@ -223,4 +222,4 @@ class BonsorBot:
 
 
 if __name__ == "__main__":
-    BonsorBot(BONSOR_FRIDAY_INTERMEDIATE_URL)
+    BonsorBot(BONSOR_TUESDAY_BEGINNER_URL)
