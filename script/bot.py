@@ -147,7 +147,7 @@ class RegistrationBot:
         None
         """
         # Wait until it's 9 o'clock
-        while datetime.now().hour != 1:
+        while datetime.now().hour != BONSOR_REGISTRATION_TIME_HOUR:
             sleep(0.1)  # check every 100 ms
 
         # First Refresh
