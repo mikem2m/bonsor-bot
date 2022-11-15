@@ -268,7 +268,7 @@ class RegistrationBot:
         current_balance = float(
             self.driver.find_element(
                 By.XPATH, "//*[@id='current-balance']/div/span[2]"
-            ).text.split("$")[1]
+            ).text.split("$")[1].replace(')', '')
         )
         if current_balance < self.num_participants * BONSOR_REGISTRATION_COST:
             print("Insufficient Fund")
@@ -366,7 +366,7 @@ class RegistrationBot:
         except NoSuchElementException:
             return False
         return True
-        
+
 
 if __name__ == "__main__":
     RegistrationBot(EDMONDS_TUESDAY_URL)
