@@ -1,12 +1,14 @@
 """
 Volleyball Registration Automation (Webreg Burnaby) using Selenium
 
-Classes:
-    RegistrationBot
+Classes
+-------
+RegistrationBot
 
-Author:
-    Jonathan Aditya @ https://github.com/jo-adithya
-    Michael Suriawan @ https://github.com/mikem2m
+Author
+------
+Jonathan Adithya @ https://github.com/jo-adithya
+Michael Suriawan @ https://github.com/mikem2m
 """
 
 import os
@@ -100,7 +102,7 @@ class RegistrationBot:
         -------
         None
         """
-        self.driver.get(self.url)
+        self.driver.get(self._url)
 
         # Wait until webpage loads
         WebDriverWait(self.driver, 10).until(
@@ -376,7 +378,7 @@ class RegistrationBot:
 
 
 if __name__ == "__main__":
-    if url := generate_url() is not None:
+    if (url := generate_url()) is not None:
         RegistrationBot.url(url)
     else:
         print('No volleyball registration for today')
