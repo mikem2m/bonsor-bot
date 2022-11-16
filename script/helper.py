@@ -38,6 +38,17 @@ BONSOR_REGISTRATION_TIME_HOUR = 9
 BONSOR_REGISTRATION_COST = 5.25
 
 def generate_url():
+    """URL Generator based on the current weekday
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    url : str
+        url for the volleyball registration
+    """
     weekday = datetime.now().isoweekday()
     if weekday == 2:    # Tuesday
         return EDMONDS_TUESDAY_URL
