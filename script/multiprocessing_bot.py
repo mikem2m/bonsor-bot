@@ -43,6 +43,6 @@ def multiprocessing_bot(url, ids, pins):
 
 if __name__ == '__main__':
     load_dotenv()
-    member_ids = os.environ.get('MEMBER_IDS').split(' ')
-    family_pins = os.environ.get('FAMILY_PINS').split(' ')
+    member_ids = os.environ.get('MEMBER_IDS').split(' ')[:4]
+    family_pins = os.environ.get('FAMILY_PINS').split(' ')[:4]
     multiprocessing_bot(generate_url(), member_ids, family_pins)
