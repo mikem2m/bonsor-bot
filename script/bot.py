@@ -53,7 +53,7 @@ class RegistrationBot:
 
     def __init__(self, _url, member_id, family_pin):
         # Init driver
-        self.driver = webdriver.Chrome("../../chromedriver 2")
+        self.driver = webdriver.Chrome("/Users/jonathanadithya/Documents/scripts/BonsorBot/bonsor-bot/chromedriver/chromedriver 2")
 
         # Init constants
         self._url = _url
@@ -380,7 +380,7 @@ class RegistrationBot:
 
 
 if __name__ == "__main__":
-    if (url := generate_url()) is not None:
+    if (url := generate_url(None)) is not None:
         RegistrationBot.url(url)
     else:
         print('No volleyball registration for today')

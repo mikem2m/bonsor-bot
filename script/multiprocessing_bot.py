@@ -6,6 +6,7 @@ multiprocess_bot(url, member_ids, family_pins)
 """
 
 import os
+import sys
 from multiprocessing import Process
 from dotenv import load_dotenv
 
@@ -45,4 +46,11 @@ if __name__ == '__main__':
     load_dotenv()
     member_ids = os.environ.get('MEMBER_IDS').split(' ')[:4]
     family_pins = os.environ.get('FAMILY_PINS').split(' ')[:4]
-    multiprocessing_bot(generate_url(), member_ids, family_pins)
+    TYPE = None
+    if len(sys.argv) > 1:
+        TYPE = sys.argv[1]
+    print(TYPE)
+    if (url := generate_url(TYPE)) is not None:
+        multiprocessing_bot(url, member_ids, family_pins)
+    else:
+        print('No volleyball registration for today')

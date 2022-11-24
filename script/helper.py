@@ -37,7 +37,7 @@ BONSOR_FRIDAY_INTERMEDIATE_URL = (
 BONSOR_REGISTRATION_TIME_HOUR = 9
 BONSOR_REGISTRATION_COST = 5.25
 
-def generate_url():
+def generate_url(type):
     """URL Generator based on the current weekday
 
     Parameters
@@ -51,9 +51,11 @@ def generate_url():
     """
     weekday = datetime.now().isoweekday()
     if weekday == 2:    # Tuesday
+        if type == 'bonsor-inter':
+            return BONSOR_TUESDAY_BEGINNER_URL
+        if type == 'bonsor-beg':
+            return BONSOR_TUESDAY_BEGINNER_URL
         return EDMONDS_TUESDAY_URL
-        # return BONSOR_TUESDAY_BEGINNER_URL
-        # return BONSOR_TUESDAY_INTERMEDIATE_URL
     if weekday == 4:  # Thursday
         return EDMONDS_THURSDAY_URL
     if weekday == 5:  # Friday
