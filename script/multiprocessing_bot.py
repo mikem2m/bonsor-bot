@@ -45,4 +45,7 @@ if __name__ == '__main__':
     load_dotenv()
     member_ids = os.environ.get('MEMBER_IDS').split(' ')[:4]
     family_pins = os.environ.get('FAMILY_PINS').split(' ')[:4]
-    multiprocessing_bot(generate_url(), member_ids, family_pins)
+    if (url := generate_url()) is not None:
+        multiprocessing_bot(url, member_ids, family_pins)
+    else:
+        print('No volleyball registration for today')

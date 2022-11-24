@@ -51,9 +51,9 @@ def generate_url():
     """
     weekday = datetime.now().isoweekday()
     if weekday == 2:    # Tuesday
-        return EDMONDS_TUESDAY_URL
+        # return EDMONDS_TUESDAY_URL
         # return BONSOR_TUESDAY_BEGINNER_URL
-        # return BONSOR_TUESDAY_INTERMEDIATE_URL
+        return BONSOR_TUESDAY_INTERMEDIATE_URL
     if weekday == 4:  # Thursday
         return EDMONDS_THURSDAY_URL
     if weekday == 5:  # Friday
