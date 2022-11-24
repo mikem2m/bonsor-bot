@@ -226,6 +226,8 @@ class RegistrationBot:
                 )
             )
 
+            print(f"Successfully added client: {name}")
+
             # Add another participant if it's not the last element
             if idx != self.num_participants - 1:
                 add_another_participant_button = self.driver.find_element(
